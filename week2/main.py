@@ -109,3 +109,77 @@ PolygonA = Polygon((p9,p10,p11,p12))
 print('Print the perimeter of Polygon A.',PolygonA.calculatePerimeter())
 
 
+
+print("======================")
+
+
+class Red:
+    def __init__(self,label,x,y,vx,vy):
+        self.label = label
+        self.point = 10
+        self.x = x  
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+    def walk(self):
+        if self.point > 0:
+            self.x += self.vx
+            self.y += self.vy
+
+    def beAttack(self,point):
+        if self.point > 0:
+            self.point -= point
+            if(self.point <= 0):
+                print(f"Dead {self.label} {self.x} {self.y}")
+
+
+class BG:
+    def __init__(self,x,y,point,range):
+        self.x = x
+        self.y = y
+        self.point = point
+        self.range = range
+
+
+    def attack_to_area(self,enemy:Red):
+
+
+        # 計算兩點距離
+        distance = math.sqrt((self.x - enemy.x) ** 2 + (self.y - enemy.y) ** 2)
+        if self.range >= distance :
+            enemy.beAttack(self.point)
+
+class Blue(BG):
+    def __init__(self,x,y):
+        super().__init__(x,y,1,2)
+
+class Green(BG):
+    def __init__(self,x,y):
+        super().__init__(x,y,2,4)
+
+
+
+E1 = Red("E1",-10,2,2,-1)
+E2 = Red('E2',-8,0,3,1)
+E3 = Red('E3',-9,-1,3,0)
+T1 = Blue(-3,2)
+T2 = Blue(-1,-2)
+T3 = Blue(4,2)
+T4 = Blue(7,0)
+A1 = Green(1,1)
+A2 = Green(4,-3)
+
+eList = [E1,E2,E3]
+TAList = [T1,T2,T3,T4,A1,A2]
+
+for e in eList:
+    for i in range(10):
+        e.walk()
+        for TA in TAList:
+            TA.attack_to_area(e)
+
+print(E1.label,E1.x,E1.y,E1.point)
+print(E2.label ,E2.x,E2.y,E2.point)
+print(E3.label,E3.x,E3.y,E3.point)
+    
