@@ -62,7 +62,6 @@ class Network:
 
 input = np.array([1.5,0.5])
 input2 = np.array([0,1])
-input3 = np
 
 nn=Network()
 outputs1 = nn.forward(input,initNetwork1)
