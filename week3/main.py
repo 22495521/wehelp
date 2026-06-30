@@ -57,7 +57,7 @@ class Network:
             else:
                 y = np.dot(y, n[i]["w"]) + n[i]["b"]
         return y
- 
+
 
 
 input = np.array([1.5,0.5])
