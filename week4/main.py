@@ -15,11 +15,19 @@ def binary_cross_entropy(y_true, y_pred):
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     
-    return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
+    return -np.sum(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
+def categorical_cross_entropy(y_true, y_pred):
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return -np.sum(y_true * np.log(y_pred))
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
 
 def initNetwork1():
     return [
@@ -51,6 +59,41 @@ def initNetwork2():
         }
     ]
 
+def initNetwork3():
+    return [
+        {
+            "w": np.array([
+                [0.5, 0.6],
+                [0.2, -0.6]
+            ]),
+            "b": np.array([0.3, 0.25])
+        },
+        {
+            "w": np.array([
+                [0.8,0.5,0.3],
+                [-0.4, 0.4, 0.75]
+            ]),
+            "b": np.array([0.6,0.5,-0.5])
+        }
+    ]
+
+def initNetwork4():
+    return [
+        {
+            "w": np.array([
+                [0.5, 0.6],
+                [0.2, -0.6]
+            ]),
+            "b": np.array([0.3, 0.25])
+        },
+        {
+            "w": np.array([
+                [0.8, 0.5, 0.3],
+                [-0.4, 0.4, 0.75]
+            ]),
+            "b": np.array([0.6, 0.5, -0.5])
+        }
+    ]
 
 class Network:
 
@@ -84,7 +127,6 @@ print("Total Loss", mse(expects2, outputs2))
 
 print("----- Model 2 -----")
 
-
 input3 = np.array([0.75,1.25])
 outputs3 = nn.forward(input3, initNetwork2(), relu, sigmoid)
 print("Outputs", outputs3)
@@ -97,5 +139,31 @@ print("Outputs", outputs4)
 expects4 = np.array([0])
 print("Total Loss", binary_cross_entropy(expects4, outputs4))
 
-  
 print("----- Model 3 -----")
+
+input5 = np.array([1.5,0.5])
+outputs5 = nn.forward(input5, initNetwork3(), relu, sigmoid)
+print("Outputs", outputs5)
+expects5 = np.array([1,0,1])
+print("Total Loss", binary_cross_entropy(expects5, outputs5))
+
+input6 = np.array([0,1])
+outputs6 = nn.forward(input6, initNetwork3(), relu, sigmoid)
+print("Outputs", outputs6)
+expects6 = np.array([1,1,0])
+print("Total Loss", binary_cross_entropy(expects6, outputs6))
+
+
+print("----- Model 4 -----")
+
+input7 = np.array([1.5,0.5])
+outputs7 = nn.forward(input7, initNetwork4(), relu, softmax)
+print("Outputs", outputs7)
+expects7 = np.array([1,0,0])
+print("Total Loss", categorical_cross_entropy(expects7, outputs7))
+
+input8 = np.array([0,1])
+outputs8 = nn.forward(input8, initNetwork4(), relu, softmax)
+print("Outputs", outputs8)
+expects8 = np.array([0,0,1])
+print("Total Loss", categorical_cross_entropy(expects8, outputs8))
