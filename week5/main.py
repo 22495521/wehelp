@@ -120,6 +120,13 @@ def initNetwork1():
     ]
 
 
+def initNetwork2():
+    return [
+        Layer(w=[[0.5, 0.6], [0.2, -0.6]], b=[0.3, 0.25], activation=ReLU()),
+        Layer(w=[[0.8], [0.4]],             b=[-0.5],       activation=Sigmoid()),
+    ]
+
+
 
 # ----- Model 1 -----
 print("----- Model 1 -----")
@@ -136,5 +143,25 @@ nn1.zero_grad(learning_rate1)
 
 print(f"Loss: {loss:.6f} | Output: {np.round(outputs, 4)}")
 for i, layer in enumerate(nn1.layers):
+    print(f"  Layer {i} w:\n{np.round(layer.w, 4)}")
+    print(f"  Layer {i} b: {np.round(layer.b, 4)}")
+
+
+# ----- Model 2 -----
+print("----- Model 2 -----")
+nn2 = Network(initNetwork2())
+expects2 = np.array([1])
+loss_fn2 = BCELoss()
+learning_rate2 = 0.1
+
+for epoch in range(1000):
+    outputs = nn2.forward(np.array([0.75, 1.25]))
+    loss = loss_fn2.get_loss(expects2, outputs)
+    output_gradients = loss_fn2.get_output_gradients(outputs, expects2)
+    nn2.backward(output_gradients)
+    nn2.zero_grad(learning_rate2)
+
+print(f"Final Loss: {loss:.6f} | Final Output: {np.round(outputs, 4)}")
+for i, layer in enumerate(nn2.layers):
     print(f"  Layer {i} w:\n{np.round(layer.w, 4)}")
     print(f"  Layer {i} b: {np.round(layer.b, 4)}")
