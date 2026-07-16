@@ -115,9 +115,9 @@ class Network:
 
 def initNetwork1():
     return [
-        Layer(w=[[0.5, 0.6], [0.2, -0.6]], b=[0.3, 0.25], activation=ReLU()),
-        Layer(w=[[0.8], [-0.5]],            b=[0.6],        activation=Linear()),
-        Layer(w=[[0.6, -0.3]],              b=[0.4, 0.75],  activation=Linear()),
+        Layer(w=[[0.5, 0.6], [0.2, -0.6]], b=np.full(8, 0.1), activation=ReLU()),
+        Layer(w=[[0.8], [-0.5]],            b=np.full(8, 0.1),        activation=Linear()),
+        Layer(w=[[0.6, -0.3]],              b=np.full(8, 0.1),  activation=Linear()),
     ]
 
 
