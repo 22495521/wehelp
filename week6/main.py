@@ -178,31 +178,112 @@ hzScores, havg_price, hsd_price = calculate_zScore_list(high)
 wzScores, wavg_price, wsd_price = calculate_zScore_list(weight)
 
 # ----- Model 1 -----
-print("----- Model 1 -----")
-nn1 = Network(initNetwork1())
-xs = np.hstack([sex,hzScores])
-es = np.array(wzScores)
-loss_fn1 = MSELoss()
-learning_rate1 = 0.001
+# print("----- Model 1 -----")
+# nn1 = Network(initNetwork1())
+# xs = np.hstack([sex,hzScores])
+# es = np.array(wzScores)
+# loss_fn1 = MSELoss()
+# learning_rate1 = 0.001
 
-for epoch in range(10):
-    losses = []
-    for x, y in zip(xs, es):
-        outputs = nn1.forward(x)
-        loss = loss_fn1.get_loss(y, outputs)
-        output_gradients = loss_fn1.get_output_gradients(outputs, y)
-        nn1.backward(output_gradients)
-        nn1.zero_grad(learning_rate1)
+# for epoch in range(10):
+#     losses = []
+#     for x, y in zip(xs, es):
+#         outputs = nn1.forward(x)
+#         loss = loss_fn1.get_loss(y, outputs)
+#         output_gradients = loss_fn1.get_output_gradients(outputs, y)
+#         nn1.backward(output_gradients)
+#         nn1.zero_grad(learning_rate1)
 
-loss_sum=0
-for x, y in zip(xs, es):
-    outputs=nn1.forward(x)
-    loss=loss_fn1.get_loss(y, outputs)
-    loss_sum+=loss
+# loss_sum=0
+# for x, y in zip(xs, es):
+#     outputs=nn1.forward(x)
+#     loss=loss_fn1.get_loss(y, outputs)
+#     loss_sum+=loss
 
-avg_loss = loss_sum / len(xs)
+# avg_loss = loss_sum / len(xs)
 
-print(avg_loss)
-# 換成正確數值
-avg_loss_pounds = (avg_loss ** 0.5) * wsd_price[0]
-print(f"平均誤差:{avg_loss_pounds:.2f} 磅")
+# print(avg_loss)
+
+
+# # 換成正確數值
+# avg_loss_pounds = (avg_loss ** 0.5) * wsd_price[0]
+# print(f"平均誤差:{avg_loss_pounds:.2f} 磅")
+
+
+# ----- Model 2 -----
+
+# 讀取 titanic.csv
+def load_titanic_csv(file_path):
+    survived = []
+    pclass = []
+    sex = []   # 1 是女, 0 是男
+    age = []
+    with open(file_path, newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        for row in reader:
+            row_survived = row[1]
+            row_pclass = row[2]
+            row_sex = row[4]
+            row_age = row[5]
+            if row_age.strip() == "":
+                continue
+            survived.append([float(row_survived)])
+            pclass.append([float(row_pclass)])
+            sex.append([1.0 if row_sex.strip().lower() == "female" else 0.0])
+            age.append([float(row_age)])
+    survived = np.array(survived, dtype=float)
+    pclass = np.array(pclass, dtype=float)
+    sex = np.array(sex, dtype=float)
+    age = np.array(age, dtype=float)
+    return survived, pclass, sex, age
+
+
+titanic_csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "titanic.csv")
+t_survived, t_pclass, t_sex, t_age = load_titanic_csv(titanic_csv_path)
+# age z分數
+azScores, aavg_price, asd_price = calculate_zScore_list(t_age)
+
+def initNetwork2():
+    return [
+        Layer(w=np.random.randn(3, 8) * 0.5, b=np.full(8, 0.1), activation=ReLU()),
+        Layer(w=np.random.randn(8, 1) * 0.5, b=np.full(1, 0.1), activation=Sigmoid()),
+    ]
+
+
+print("----- Model 2 -----")
+nn2 = Network(initNetwork2())
+xs2 = np.hstack([t_pclass, t_sex, azScores])
+es2 = np.array(t_survived)
+loss_fn2 = BCELoss()
+learning_rate2 = 0.01
+
+for epoch in range(100):
+    # loss_sum2 = 0
+    for x, y in zip(xs2, es2):
+        outputs = nn2.forward(x)
+        loss = loss_fn2.get_loss(y, outputs)
+        output_gradients = loss_fn2.get_output_gradients(outputs, y)
+        nn2.backward(output_gradients)
+        nn2.zero_grad(learning_rate2)
+        # loss_sum2 += loss
+
+    # avg_loss2 = loss_sum2 / len(xs2)
+    # print(avg_loss2)
+
+
+# 評估準確率
+correct_count = 0
+threshold = 0.5
+for x, e in zip(xs2, es2):
+    output = nn2.forward(x)
+    print(output)
+    survival_status = 0
+    if output > threshold:
+        survival_status = 1
+    if survival_status == e:
+        correct_count += 1
+
+correct_rate = correct_count / len(xs2)
+print("正確率:", correct_rate)
+
