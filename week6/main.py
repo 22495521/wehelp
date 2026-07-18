@@ -204,12 +204,10 @@ for x, y in zip(xs, es):
 
 avg_loss = loss_sum / len(xs)
 
-print(avg_loss)
-
-
 # # 換成正確數值
 avg_loss_pounds = (avg_loss ** 0.5) * wsd_price[0]
-print(f"平均誤差:{avg_loss_pounds:.2f} 磅")
+print("Average Loss in Weight ", avg_loss_pounds)
+# print(f"平均誤差:{avg_loss_pounds:.2f} 磅")
 
 
 # ----- Model 2 -----
@@ -261,25 +259,18 @@ loss_fn2 = BCELoss()
 learning_rate2 = 0.01
 
 for epoch in range(100):
-    loss_sum2 = 0
     for x, y in zip(xs2, es2):
         outputs = nn2.forward(x)
         loss = loss_fn2.get_loss(y, outputs)
         output_gradients = loss_fn2.get_output_gradients(outputs, y)
         nn2.backward(output_gradients)
         nn2.zero_grad(learning_rate2)
-        loss_sum2 += loss
-
-    avg_loss2 = loss_sum2 / len(xs2)
-    print(avg_loss2)
-
 
 # 評估準確率
 correct_count = 0
 threshold = 0.5
 for x, e in zip(xs2, es2):
     output = nn2.forward(x)
-    print(output)
     survival_status = 0
     if output > threshold:
         survival_status = 1
@@ -287,17 +278,20 @@ for x, e in zip(xs2, es2):
         correct_count += 1
 
 correct_rate = correct_count / len(xs2)
-print("正確率:", correct_rate)
+print(correct_rate * 100,"%" )
 
 
-
+print("-------- Task 3-1 -------")
 list1 =  [[2, 3, 1], [5, -2, 1]]
 t1 = torch.tensor(list1)
+
 print(t1.shape)
 print(t1.dtype)
+print("-------- Task 3-2 -------")
 t2 = torch.rand(3, 4, 2)
 print(t2)
 print(t2.shape)
+print("-------- Task 3-3 -------")
 t3 = torch.ones((2,1,5))
 print(t3.shape)
 print(t3)
@@ -307,11 +301,15 @@ list3 = [[5], [2], [1]]
 t4 = torch.tensor(list2)
 t5 = torch.tensor(list3)
 t6 = t4 @ t5
+print("-------- Task 3-4 -------")
+print(t6.shape)
 print(t6)
 list4 = [[1, 2], [2, 3], [-1, 3]]
 list5 = [[5, 4], [2, 1], [1, -5]]
 t7 = torch.tensor(list4)
 t8 = torch.tensor(list5)
 t9 = t7 * t8
-print(t9)
+print("-------- Task 3-5 -------")
 print(t9.shape)
+print(t9)
+
