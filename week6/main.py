@@ -261,7 +261,7 @@ loss_fn2 = BCELoss()
 learning_rate2 = 0.01
 
 for epoch in range(100):
-    # loss_sum2 = 0
+    loss_sum2 = 0
     for x, y in zip(xs2, es2):
         outputs = nn2.forward(x)
         loss = loss_fn2.get_loss(y, outputs)
