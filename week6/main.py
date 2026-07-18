@@ -1,6 +1,8 @@
 import numpy as np
 import csv
 import os
+import torch
+
 
 class ReLU:
 
@@ -251,21 +253,21 @@ def initNetwork2():
     ]
 
 
-print("----- Model 2 -----")
-nn2 = Network(initNetwork2())
-xs2 = np.hstack([t_pclass, t_sex, azScores])
-es2 = np.array(t_survived)
-loss_fn2 = BCELoss()
-learning_rate2 = 0.01
+# print("----- Model 2 -----")
+# nn2 = Network(initNetwork2())
+# xs2 = np.hstack([t_pclass, t_sex, azScores])
+# es2 = np.array(t_survived)
+# loss_fn2 = BCELoss()
+# learning_rate2 = 0.01
 
-for epoch in range(100):
-    # loss_sum2 = 0
-    for x, y in zip(xs2, es2):
-        outputs = nn2.forward(x)
-        loss = loss_fn2.get_loss(y, outputs)
-        output_gradients = loss_fn2.get_output_gradients(outputs, y)
-        nn2.backward(output_gradients)
-        nn2.zero_grad(learning_rate2)
+# for epoch in range(100):
+#     # loss_sum2 = 0
+#     for x, y in zip(xs2, es2):
+#         outputs = nn2.forward(x)
+#         loss = loss_fn2.get_loss(y, outputs)
+#         output_gradients = loss_fn2.get_output_gradients(outputs, y)
+#         nn2.backward(output_gradients)
+#         nn2.zero_grad(learning_rate2)
         # loss_sum2 += loss
 
     # avg_loss2 = loss_sum2 / len(xs2)
@@ -273,17 +275,43 @@ for epoch in range(100):
 
 
 # 評估準確率
-correct_count = 0
-threshold = 0.5
-for x, e in zip(xs2, es2):
-    output = nn2.forward(x)
-    print(output)
-    survival_status = 0
-    if output > threshold:
-        survival_status = 1
-    if survival_status == e:
-        correct_count += 1
+# correct_count = 0
+# threshold = 0.5
+# for x, e in zip(xs2, es2):
+#     output = nn2.forward(x)
+#     print(output)
+#     survival_status = 0
+#     if output > threshold:
+#         survival_status = 1
+#     if survival_status == e:
+#         correct_count += 1
 
-correct_rate = correct_count / len(xs2)
-print("正確率:", correct_rate)
+# correct_rate = correct_count / len(xs2)
+# print("正確率:", correct_rate)
 
+
+
+list1 =  [[2, 3, 1], [5, -2, 1]]
+t1 = torch.tensor(list1)
+print(t1.shape)
+print(t1.dtype)
+t2 = torch.rand(3, 4, 2)
+print(t2)
+print(t2.shape)
+t3 = torch.ones((2,1,5))
+print(t3.shape)
+print(t3)
+
+list2 = [[1, 2, 4], [2, 1, 3]]
+list3 = [[5], [2], [1]]
+t4 = torch.tensor(list2)
+t5 = torch.tensor(list3)
+t6 = t4 @ t5
+print(t6)
+list4 = [[1, 2], [2, 3], [-1, 3]]
+list5 = [[5, 4], [2, 1], [1, -5]]
+t7 = torch.tensor(list4)
+t8 = torch.tensor(list5)
+t9 = t7 * t8
+print(t9)
+print(t9.shape)
