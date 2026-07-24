@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 import csv
 import os
-from torch.utils.data import Dataset,DataLoader
+from torch.utils.data import Dataset,DataLoader,random_split
 
 
 
@@ -72,7 +72,11 @@ class MyDataset(Dataset):
         return self.x[idx], self.y[idx]
 
 ds = MyDataset(np.hstack([sex, hzScores]), np.array(wzScores))
-loader = DataLoader(ds, shuffle=True,batch_size=64)
+
+# 切割
+train_ds, val_ds = random_split(ds, [0.8, 0.2])
+
+loader = DataLoader(train_ds, shuffle=True,batch_size=64)
 
 
 model = nn.Sequential(
@@ -95,9 +99,18 @@ for epoch in range(50):
         loss.backward()
         optimizer.step()
 
-        total_loss += loss.item() * len(xb)
+# 評估
+        
+total_loss = 0
+loader = DataLoader(val_ds, shuffle=True,batch_size=64)
+for xb, yb in loader:
+    logits = model(xb)
+    loss = criterion(logits, yb)
+    total_loss += loss.item() * len(xb)
 
-    epoch_loss = total_loss / len(ds)
-    rmse = epoch_loss ** 0.5 * wsd_price[0]
-    print(f"epoch {epoch+1}, loss={epoch_loss:.4f}, RMSE={rmse:.2f} lbs")
 
+avg_loss = total_loss / len(val_ds)
+avg_loss_pounds = (avg_loss ** 0.5) * wsd_price[0]
+print("Average Loss in Weight ", avg_loss_pounds)
+
+print("---------------model 1 finish-----------------------")
