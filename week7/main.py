@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 import csv
 import os
+from torch.utils.data import Dataset,DataLoader
 
 
 
@@ -59,30 +60,44 @@ hzScores, havg_price, hsd_price = calculate_zScore_list(high)
 wzScores, wavg_price, wsd_price = calculate_zScore_list(weight)
 
 
-# 假資料：784 維輸入（28x28 攤平），10 類
-x = torch.tensor(np.hstack([sex, hzScores]), dtype=torch.float32)
-y = torch.tensor(np.array(wzScores), dtype=torch.float32)
+class MyDataset(Dataset):
+    def __init__(self,x ,y):
+        self.x = torch.tensor(x, dtype=torch.float32)
+        self.y = torch.tensor(y, dtype=torch.float32)
 
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+
+ds = MyDataset(np.hstack([sex, hzScores]), np.array(wzScores))
+loader = DataLoader(ds, shuffle=True,batch_size=64)
 
 
 model = nn.Sequential(
-    nn.Linear(2, 3),  
+    nn.Linear(2, 5),  
     nn.ReLU(),
-    nn.Linear(3, 1),    
+    nn.Linear(5, 1),    
 )
 
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
-for epoch in range(1000):
-    logits = model(x)
 
-    loss = criterion(logits, y)
+for epoch in range(50):
+    total_loss = 0.0
+    for xb, yb in loader:
+        logits = model(xb)
+        loss = criterion(logits, yb)
 
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-    rmse = loss.item() ** 0.5 * wsd_price[0]
-    print(f"epoch {epoch+1}, loss={loss.item():.4f}, RMSE={float(rmse):.2f} lbs")
+        total_loss += loss.item() * len(xb)
+
+    epoch_loss = total_loss / len(ds)
+    rmse = epoch_loss ** 0.5 * wsd_price[0]
+    print(f"epoch {epoch+1}, loss={epoch_loss:.4f}, RMSE={rmse:.2f} lbs")
 
