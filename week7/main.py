@@ -114,3 +114,93 @@ avg_loss_pounds = (avg_loss ** 0.5) * wsd_price[0]
 print("Average Loss in Weight ", avg_loss_pounds)
 
 print("---------------model 1 finish-----------------------")
+
+# 讀取 titanic.csv
+def load_titanic_csv(file_path):
+    survived = []
+    pclass = []
+    sex = []   # 1 是女, 0 是男
+    age = []
+    with open(file_path, newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        for row in reader:
+            row_survived = row[1]
+            row_pclass = row[2]
+            row_sex = row[4]
+            row_age = row[5]
+            if row_age.strip() == "":
+                row_age = 0.0
+            else :
+                row_age = float(row_age)
+            survived.append([float(row_survived)])
+            pclass.append([float(row_pclass)])
+            sex.append([1.0 if row_sex.strip().lower() == "female" else 0.0])
+            age.append([float(row_age)])
+    survived = np.array(survived, dtype=float)
+    pclass = np.array(pclass, dtype=float)
+    sex = np.array(sex, dtype=float)
+    age = np.array(age, dtype=float)
+    return survived, pclass, sex, age
+
+
+titanic_csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "titanic.csv")
+t_survived, t_pclass, t_sex, t_age = load_titanic_csv(titanic_csv_path)
+# age z分數
+azScores, avg_price, asd_price = calculate_zScore_list(t_age)
+
+
+class MyDataset(Dataset):
+    def __init__(self,x ,y):
+        self.x = torch.tensor(x, dtype=torch.float32)
+        self.y = torch.tensor(y, dtype=torch.float32)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+
+ds = MyDataset(np.hstack([t_pclass, t_sex, azScores]), np.array(t_survived))
+
+
+# 切割
+train_ds, val_ds = random_split(ds, [0.8, 0.2])
+
+loader = DataLoader(train_ds, shuffle=True,batch_size=64)
+
+model = nn.Sequential(
+    nn.Linear(3, 8),  
+    nn.ReLU(),
+    nn.Linear(8, 1),
+    nn.Sigmoid()    
+)
+criterion = nn.BCELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+
+
+for epoch in range(50):
+    for xb, yb in loader:
+        logits = model(xb)
+        loss = criterion(logits, yb)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+
+# 評估準確率
+loader = DataLoader(val_ds, shuffle=True,batch_size=1)
+correct_count = 0
+threshold = 0.5
+for xb, yb in loader:
+    logits = model(xb)
+    survival_status = 0
+    if logits > threshold:
+        survival_status = 1
+    if survival_status == yb:
+        correct_count += 1
+
+correct_rate = correct_count / len(val_ds)
+print(correct_rate * 100,"%" )
