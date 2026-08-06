@@ -2,6 +2,7 @@ import csv
 import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 OUT_DIR = Path(__file__).parent / "beforeClean"
 OUT_DIR.mkdir(exist_ok=True)
@@ -26,8 +27,7 @@ session = requests.Session()
 session.headers.update(headers)
 
 TARGET = 100000
-
-for board in BOARDS:
+def crawl(board: str):
     total = 0
     page = 1
 
@@ -60,4 +60,5 @@ for board in BOARDS:
 
     print(f"{board} 完成，{total} 筆 → {board}.csv")
 
-print("全部完成")
+with ThreadPoolExecutor(max_workers=3) as pool:
+    pool.map(crawl, BOARDS)
