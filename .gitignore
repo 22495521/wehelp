@@ -2,5 +2,6 @@
 __pycache__/
 *.pyc
 .env
-/2week1/afterClean/
-/2week1/beforeClean/
+/2stage/afterClean/
+/2stage/beforeClean/
+/2stage/afterTokenize/
