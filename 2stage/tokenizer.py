@@ -12,8 +12,10 @@ BOARDS = [
     "Baseball"
 ]
 
-SRC = Path(__file__).parent / "afterClean"
-OUT = Path(__file__).parent / "afterTokenize"
+
+
+SRC = Path(__file__).parent / "testAfterClean"
+OUT = Path(__file__).parent / "testAfterTokenize"
 
 DROP_TAGS = {
     "P",
