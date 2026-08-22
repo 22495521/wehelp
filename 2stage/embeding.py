@@ -14,7 +14,7 @@ np.random.seed(42)
 # 
 # 讀取斷詞後的語料
 # 
-TOKENIZED_DIR = os.path.join(os.path.dirname(__file__), "afterTokenize")
+TOKENIZED_DIR = os.path.join(os.path.dirname(__file__), "testAfterTokenize")
 seen_titles = set()
 labels = []
 docs = []
