@@ -5,3 +5,5 @@ __pycache__/
 /2stage/afterClean/
 /2stage/beforeClean/
 /2stage/afterTokenize/
+2stage/doc2vec.model*
+
