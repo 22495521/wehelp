@@ -48,7 +48,7 @@ if os.path.exists(MODEL_PATH):
     model = Doc2Vec.load(MODEL_PATH)
 else:
     model = Doc2Vec(
-        vector_size=50, epochs=100,
+        vector_size=40, epochs=100,
         workers=os.cpu_count() or 1, seed=42,
         dm=0, window=5,
     )
