@@ -8,13 +8,17 @@ import random
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
+logging.basicConfig(
+    format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
+)
+
 random.seed(42)
 np.random.seed(42)
 
 # 
 # 讀取斷詞後的語料
 # 
-TOKENIZED_DIR = os.path.join(os.path.dirname(__file__), "testAfterTokenize")
+TOKENIZED_DIR = os.path.join(os.path.dirname(__file__), "afterTokenize")
 seen_titles = set()
 labels = []
 docs = []
@@ -44,7 +48,7 @@ if os.path.exists(MODEL_PATH):
     model = Doc2Vec.load(MODEL_PATH)
 else:
     model = Doc2Vec(
-        vector_size=100, epochs=40,
+        vector_size=50, epochs=100,
         workers=os.cpu_count() or 1, seed=42,
         dm=0, window=5,
     )
@@ -62,7 +66,7 @@ sample_ids = random.sample(range(len(train_corpus)), SAMPLE_N)
 hit1 = 0
 hit2 = 0
 for n, doc_id in enumerate(sample_ids):
-    inferred = model.infer_vector(train_corpus[doc_id].words, epochs=200)
+    inferred = model.infer_vector(train_corpus[doc_id].words, epochs=50)
     sims = model.dv.most_similar([inferred], topn=2)
     top2 = [tag for tag, _ in sims]
 
