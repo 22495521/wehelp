@@ -56,10 +56,18 @@ else:
     model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
     model.save(MODEL_PATH)
 
+
 #
-# 測試
+# 對外提供的特徵與標籤，供 multiClassification.py 匯入
 #
+X = np.asarray(model.dv.vectors, dtype=np.float32)
+y = np.asarray(labels)
+
+
 if __name__ == "__main__":
+    # 
+    # 測試
+    # 
     random.seed(42)
     SAMPLE_N = 1000
     sample_ids = random.sample(range(len(train_corpus)), SAMPLE_N)
