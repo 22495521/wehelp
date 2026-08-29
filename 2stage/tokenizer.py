@@ -72,8 +72,15 @@ def process(board: str):
             writer.writerow([label, *words])
 
 
-OUT.mkdir(exist_ok=True)
+def tokenize_titles(titles):
+    """給一批標題（清理後的文字），回傳每篇對應的斷詞結果（list[list[str]]）。"""
+    ws = ws_driver(titles)
+    pos = pos_driver(ws)
+    return [filter_words(sentence_ws, sentence_pos) for sentence_ws, sentence_pos in zip(ws, pos)]
 
-for board in BOARDS:
-    process(board)
-    print(f"[ok] {board}")
+
+if __name__ == "__main__":
+    OUT.mkdir(exist_ok=True)
+    for board in BOARDS:
+        process(board)
+        print(f"[ok] {board}")

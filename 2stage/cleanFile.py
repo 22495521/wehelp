@@ -59,7 +59,8 @@ def process(board: str):
             writer.writerow(row)
 
 
-OUT.mkdir(exist_ok=True)
-for board in BOARDS:
-    process(board)
-    print(f"[ok] {board}")
+if __name__ == "__main__":
+    OUT.mkdir(exist_ok=True)
+    for board in BOARDS:
+        process(board)
+        print(f"[ok] {board}")

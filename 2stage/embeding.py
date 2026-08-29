@@ -56,24 +56,25 @@ else:
     model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
     model.save(MODEL_PATH)
 
-# 
+#
 # 測試
-# 
-random.seed(42)
-SAMPLE_N = 1000
-sample_ids = random.sample(range(len(train_corpus)), SAMPLE_N)
+#
+if __name__ == "__main__":
+    random.seed(42)
+    SAMPLE_N = 1000
+    sample_ids = random.sample(range(len(train_corpus)), SAMPLE_N)
 
-hit1 = 0
-hit2 = 0
-for n, doc_id in enumerate(sample_ids):
-    inferred = model.infer_vector(train_corpus[doc_id].words, epochs=50)
-    sims = model.dv.most_similar([inferred], topn=2)
-    top2 = [tag for tag, _ in sims]
+    hit1 = 0
+    hit2 = 0
+    for n, doc_id in enumerate(sample_ids):
+        inferred = model.infer_vector(train_corpus[doc_id].words, epochs=50)
+        sims = model.dv.most_similar([inferred], topn=2)
+        top2 = [tag for tag, _ in sims]
 
-    if top2[0] == doc_id:
-        hit1 += 1
-    if doc_id in top2:
-        hit2 += 1
+        if top2[0] == doc_id:
+            hit1 += 1
+        if doc_id in top2:
+            hit2 += 1
 
-print(f"Self Similarity {hit1 / SAMPLE_N:.3f}")
-print(f"Second Self Similarity {hit2 / SAMPLE_N:.3f}")
+    print(f"Self Similarity {hit1 / SAMPLE_N:.3f}")
+    print(f"Second Self Similarity {hit2 / SAMPLE_N:.3f}")
