@@ -4,5 +4,4 @@ __pycache__/
 .env
 /2stage/afterClean/
 /2stage/beforeClean/
-/2stage/afterTokenize/
 
