@@ -68,7 +68,9 @@ with torch.no_grad():
     for xb, yb in loader:
         logits = model(xb)
         pred = logits.argmax(dim=1)
-        correct_count += (pred == yb).sum().item()
+        for i in range(len(yb)):
+            if pred[i] == yb[i]:
+                correct_count += 1
 
 correct_rate = correct_count / len(val_ds)
 print("Accuracy", correct_rate * 100, "%")
