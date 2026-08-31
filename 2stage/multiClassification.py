@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from embeding import X, y
+from embeding import X, y, model as d2v_model
 
 torch.manual_seed(42)
 
@@ -101,3 +101,31 @@ for epoch in range(20):
 
 val_acc = evaluate(val_loader)
 print(f"val_acc {val_acc:.4f}")
+
+
+
+from cleanFile import clean_title
+from tokenizer import tokenize_titles
+
+test_titles = [
+    "[分享] 大谷翔平今天又轟出全壘打",
+    "[問卦] 女友生日該送什麼禮物比較好",
+    "[閒聊] 這季新番大家覺得哪部最好看",
+    "[討論] 立法院昨天的表決結果",
+    "[情報] 全聯今天衛生紙特價買一送一",
+    "[新聞] 國軍漢光演習今日登場",
+    "[菜單] 預算三萬求推薦電競主機",
+    "[請益] 台積電這個價位可以進場嗎",
+    "[請益] 面試上外商軟體工程師該怎麼談薪水",
+]
+
+cleaned = [clean_title(title.strip().lower()) for title in test_titles]
+tokens_list = tokenize_titles(cleaned)
+
+model.eval()
+with torch.no_grad():
+    for title, tokens in zip(test_titles, tokens_list):
+        vector = d2v_model.infer_vector(tokens, epochs=50)
+        logits = model(torch.tensor(vector, dtype=torch.float32).unsqueeze(0))
+        pred = logits.argmax(dim=1).item()
+        print(title, "->", CLASSES[pred])
