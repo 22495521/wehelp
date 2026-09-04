@@ -39,7 +39,7 @@ train_size = int(len(dataset) * 0.8)
 val_size = len(dataset) - train_size
 train_set, val_set = random_split(dataset, [train_size, val_size])
 
-BATCH_SIZE = 256
+BATCH_SIZE = 32
 train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True)
 val_loader = DataLoader(val_set, batch_size=BATCH_SIZE)
 
@@ -51,15 +51,15 @@ print(f"訓練集 {len(train_set)}  驗證集 {len(val_set)}")
 
 
 model = nn.Sequential(
-    nn.Linear(40, 60),  
+    nn.Linear(40, 100),  
     nn.ReLU(),
-    nn.Linear(60, 50),  
+    nn.Linear(100, 50),  
     nn.ReLU(),
     nn.Linear(50, 9)
 )
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 #
@@ -103,7 +103,9 @@ val_acc = evaluate(val_loader)
 print(f"val_acc {val_acc:.4f}")
 
 
-
+# 用真實的文章標題來測試
+# 走完整流程：原始標題 -> cleanFile 清理 -> tokenizer 斷詞 -> doc2vec 向量 -> 分類模型
+# （tokenizer 在 import 時就會載入 CKIP 模型，所以放在這裡才 import，不影響前面的訓練）
 from cleanFile import clean_title
 from tokenizer import tokenize_titles
 
@@ -125,7 +127,7 @@ tokens_list = tokenize_titles(cleaned)
 model.eval()
 with torch.no_grad():
     for title, tokens in zip(test_titles, tokens_list):
-        vector = d2v_model.infer_vector(tokens, epochs=50)
+        vector = d2v_model.infer_vector(tokens, epochs=200)
         logits = model(torch.tensor(vector, dtype=torch.float32).unsqueeze(0))
         pred = logits.argmax(dim=1).item()
         print(title, "->", CLASSES[pred])
