@@ -9,6 +9,7 @@ dependencies = [
     "ckip-transformers>=0.3.4",
     "fastapi[standard]>=0.141.1",
     "gensim>=4.4.0",
+    "jinja2>=3.1.6",
     "lxml>=6.1.1",
     "numpy>=2.5.0",
     "requests>=2.34.2",
