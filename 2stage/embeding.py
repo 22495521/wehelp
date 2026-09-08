@@ -8,6 +8,8 @@ import random
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
+from net import D2V_PATH
+
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
 )
@@ -42,10 +44,8 @@ train_corpus = [TaggedDocument(words=t, tags=[i]) for i, t in enumerate(docs)]
 #
 # 訓練
 # 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "doc2vec.model")
-
-if os.path.exists(MODEL_PATH):
-    model = Doc2Vec.load(MODEL_PATH)
+if os.path.exists(D2V_PATH):
+    model = Doc2Vec.load(D2V_PATH)
 else:
     model = Doc2Vec(
         vector_size=40, epochs=100,
@@ -54,7 +54,7 @@ else:
     )
     model.build_vocab(train_corpus)
     model.train(train_corpus, total_examples=model.corpus_count, epochs=model.epochs)
-    model.save(MODEL_PATH)
+    model.save(D2V_PATH)
 
 
 #

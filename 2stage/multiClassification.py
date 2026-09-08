@@ -3,7 +3,8 @@ import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from embeding import X, y, model as d2v_model
+from embeding import X, y
+from net import build_model, save_model
 
 torch.manual_seed(42)
 
@@ -39,7 +40,7 @@ train_size = int(len(dataset) * 0.8)
 val_size = len(dataset) - train_size
 train_set, val_set = random_split(dataset, [train_size, val_size])
 
-BATCH_SIZE = 32
+BATCH_SIZE = 256
 train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True)
 val_loader = DataLoader(val_set, batch_size=BATCH_SIZE)
 
@@ -50,13 +51,7 @@ print(f"訓練集 {len(train_set)}  驗證集 {len(val_set)}")
 
 
 
-model = nn.Sequential(
-    nn.Linear(40, 100),  
-    nn.ReLU(),
-    nn.Linear(100, 50),  
-    nn.ReLU(),
-    nn.Linear(50, 9)
-)
+model = build_model(X.shape[1], len(CLASSES))
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -103,31 +98,8 @@ val_acc = evaluate(val_loader)
 print(f"val_acc {val_acc:.4f}")
 
 
-# 用真實的文章標題來測試
-# 走完整流程：原始標題 -> cleanFile 清理 -> tokenizer 斷詞 -> doc2vec 向量 -> 分類模型
-# （tokenizer 在 import 時就會載入 CKIP 模型，所以放在這裡才 import，不影響前面的訓練）
-from cleanFile import clean_title
-from tokenizer import tokenize_titles
-
-test_titles = [
-    "[分享] 大谷翔平今天又轟出全壘打",
-    "[問卦] 女友生日該送什麼禮物比較好",
-    "[閒聊] 這季新番大家覺得哪部最好看",
-    "[討論] 立法院昨天的表決結果",
-    "[情報] 全聯今天衛生紙特價買一送一",
-    "[新聞] 國軍漢光演習今日登場",
-    "[菜單] 預算三萬求推薦電競主機",
-    "[請益] 台積電這個價位可以進場嗎",
-    "[請益] 面試上外商軟體工程師該怎麼談薪水",
-]
-
-cleaned = [clean_title(title.strip().lower()) for title in test_titles]
-tokens_list = tokenize_titles(cleaned)
-
-model.eval()
-with torch.no_grad():
-    for title, tokens in zip(test_titles, tokens_list):
-        vector = d2v_model.infer_vector(tokens, epochs=200)
-        logits = model(torch.tensor(vector, dtype=torch.float32).unsqueeze(0))
-        pred = logits.argmax(dim=1).item()
-        print(title, "->", CLASSES[pred])
+#
+# 存模型（權重 + 類別對照表，之後才能還原）
+#
+path = save_model(model, CLASSES)
+print(f"模型已存到 {path}")
