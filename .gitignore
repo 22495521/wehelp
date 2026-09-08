@@ -5,3 +5,4 @@ __pycache__/
 /2stage/afterClean/
 /2stage/beforeClean/
 
+/2stage/fastapi/user-labeled-titles.csv
