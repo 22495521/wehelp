@@ -1,7 +1,11 @@
 import sys
 from contextlib import asynccontextmanager
+import csv
+from pathlib import Path
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
+from pydantic import BaseModel
 
 import torch
 from fastapi import FastAPI, Request
@@ -40,6 +44,26 @@ def predict_board(title):
     return classes[idx]
 
 
+
+CSV_PATH = Path(__file__).parent / "user-labeled-titles.csv"
+CSV_HEADERS = [ "title", "label"]
+
+def append_to_csv(title: str, label: str) -> None:
+    """把使用者回饋寫入 CSV。檔案不存在會自動建立並寫入表頭。"""
+    file_exists = CSV_PATH.exists()
+
+    with CSV_PATH.open("a", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
+
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow({
+            "title": title,
+            "label": label,
+        })
+
+
 app = FastAPI()
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
@@ -60,4 +84,26 @@ def prediction(title: str = ""):
         "title": title,
         "label": label,
         "result": label,
+    }
+
+
+
+class FeedbackRequest(BaseModel):
+    title: str
+    label: str
+
+@app.post("/api/model/feedback")
+def feedback(data: FeedbackRequest):
+    title = data.title.strip()
+    label = data.label.strip()
+
+    if not title:
+        return {"title": title, "label": label, "result": "請輸入標題"}
+
+    append_to_csv(title, label)
+
+    return {
+        "title": title,
+        "label": label,
+        "result": "已收到回饋",
     }

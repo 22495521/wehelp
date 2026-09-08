@@ -88,6 +88,33 @@
       border-left: 4px solid #2c3e50;
       color: #333;
     }
+
+    /* 九大看板按鈕 */
+    .classes {
+      max-width: 400px;
+      margin: 20px auto 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .classes button {
+      padding: 10px 4px;
+      font-size: 13px;
+      background: #f0f0f0;
+      border: 1px solid #999;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .classes button:hover {
+      background: #e0e0e0;
+    }
+
+    /* display: grid 會蓋掉瀏覽器預設的 [hidden] { display: none }，要補回來 */
+    .classes[hidden] {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -112,6 +139,18 @@
       </div>
 
       <div class="result" id="result" hidden></div>
+
+      <div class="classes" id="classes" hidden>
+        <button type="button">Baseball</button>
+        <button type="button">Boy-Girl</button>
+        <button type="button">C_Chat</button>
+        <button type="button">HatePolitics</button>
+        <button type="button">Lifeismoney</button>
+        <button type="button">Military</button>
+        <button type="button">PC_Shopping</button>
+        <button type="button">Stock</button>
+        <button type="button">Tech_Job</button>
+      </div>
     </div>
   </div>
 
@@ -119,12 +158,14 @@
     const form = document.getElementById("predict-form");
     const input = document.getElementById("title-input");
     const box = document.getElementById("result");
+    const boards = document.getElementById("classes");
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       box.hidden = false;
       box.textContent = "預測中...";
+      boards.hidden = false;
 
       try {
         const query = new URLSearchParams({ title: input.value });
@@ -135,6 +176,30 @@
         box.textContent = data.result;
       } catch (err) {
         box.textContent = `預測失敗：${err.message}`;
+      }
+    });
+
+    // 九大看板按鈕：回報正確分類
+    boards.addEventListener("click", async (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      const label = button.textContent.trim();
+      box.hidden = false;
+      box.textContent = `回報中...`;
+
+      try {
+        const res = await fetch("/api/model/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: input.value, label }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        box.textContent = data.result;
+      } catch (err) {
+        box.textContent = `回報失敗：${err.message}`;
       }
     });
   </script>
