@@ -13,9 +13,6 @@ import numpy as np
 from ckip_transformers.nlp import CkipPosTagger, CkipWordSegmenter
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
-logging.basicConfig(
-    format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
-)
 
 random.seed(42)
 np.random.seed(42)
@@ -59,8 +56,8 @@ def is_useful_word(word, tag):
 
 def tokenize(texts):
     """一批文字 → 每篇的詞列表（list[list[str]]）"""
-    words_per_text = ws_driver(texts)
-    tags_per_text = pos_driver(words_per_text)
+    words_per_text = ws_driver(texts, show_progress=False)
+    tags_per_text = pos_driver(words_per_text, show_progress=False)
 
     results = []
     for words, tags in zip(words_per_text, tags_per_text):
@@ -73,7 +70,7 @@ def tokenize(texts):
 # 讀取法條
 #
 def load_article_contents(path=LAW_PATH):
-    """回傳 LawArticles 裡每一筆的 ArticleContent"""
+    """回傳 LawArticles 裡每一筆的 ArticleContent（略過已廢止的「（刪除）」條文）"""
     with open(path, encoding="utf-8-sig") as f:
         law = json.load(f)
 
@@ -95,14 +92,19 @@ def train(docs):
         vector_size=40,
         epochs=200,
         dm=0,
-        window=5,
-        min_count=1,
-        workers=1,
         seed=42,
     )
     model.build_vocab(corpus)
     model.train(corpus, total_examples=model.corpus_count, epochs=model.epochs)
     return model
+
+
+#
+# 推論
+#
+def infer(model, words, topn=10):
+    inferred = model.infer_vector(words, epochs=50)
+    return model.dv.most_similar([inferred], topn=topn)
 
 
 #
@@ -112,8 +114,7 @@ def evaluate(model, docs):
     hit1 = 0
     hit2 = 0
     for doc_id, words in enumerate(docs):
-        inferred = model.infer_vector(words, epochs=50)
-        top2 = [tag for tag, _ in model.dv.most_similar([inferred], topn=2)]
+        top2 = [tag for tag, _ in infer(model, words, topn=2)]
 
         if top2[0] == doc_id:
             hit1 += 1
@@ -125,6 +126,11 @@ def evaluate(model, docs):
 
 
 if __name__ == "__main__":
+    # 只有直接執行（訓練／驗證）時才印 INFO log，被 import 時不印
+    logging.basicConfig(
+        format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
+    )
+
     contents = load_article_contents()
     docs = tokenize(contents)
 
